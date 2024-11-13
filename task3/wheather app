@@ -1,0 +1,50 @@
+import requests
+
+API_KEY = '3e73603b10b5a03851dde733ead576af'  # Replace with your OpenWeatherMap API Key
+BASE_URL = 'http://api.openweathermap.org/data/2.5/weather?q=Hyderabad&appid=3e73603b10b5a03851dde733ead576af&units=metric'
+
+def get_weather(city):
+    params = {
+        'q': city,
+        'appid': API_KEY,
+        'units': 'metric'  # For Celsius; use 'imperial' for Fahrenheit
+    }
+    
+    try:
+        response = requests.get(BASE_URL, params=params)
+        response.raise_for_status()  # Raises an error for status codes >= 400
+        data = response.json()
+
+        # Check if the city was found
+        if data.get("cod") == "404":
+            print("Error: City not found. Please check the city name.")
+            return
+        
+        # Extract weather details
+        city_name = data['name']
+        temperature = data['main']['temp']
+        humidity = data['main']['humidity']
+        description = data['weather'][0]['description']
+        
+        # Display weather details
+        print(f"\nWeather in {city_name}:")
+        print(f"Temperature: {temperature}°C")
+        print(f"Humidity: {humidity}%")
+        print(f"Condition: {description.capitalize()}")
+    
+    except requests.exceptions.HTTPError:
+        print("Error: Invalid API key or API rate limit exceeded.")
+    except requests.exceptions.ConnectionError:
+        print("Error: Network connection issue. Please check your internet connection.")
+    except requests.exceptions.Timeout:
+        print("Error: The request timed out. Try again later.")
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred: {e}")
+
+def main():
+    print("Simple Weather App\n")
+    city = input("Enter city name: ")
+    get_weather(city)
+
+if __name__ == '__main__':
+    main()
